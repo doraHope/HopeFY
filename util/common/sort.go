@@ -31,8 +31,8 @@ func SortMapSI64(sm map[string]int64) []string {
         })
     }
     sort.Sort(SliceSI64(ss))
-    for k, _ := range ss {
-        result = append(result, k)
+    for _, item := range ss {
+        result = append(result, item.key)
     }
     return result
 }
