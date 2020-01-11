@@ -12,7 +12,7 @@ var jwtSecret = []byte(settting.AppSetting.JwSecret)
 type Claims struct {
     UserName string `json:"username"`
     UserId   uint64 `json:"userId"`
-    Extra    map[string]interface{}
+    Extra    map[string]interface{} `json:"extra, omitempty"`
     jwt.StandardClaims
 }
 
