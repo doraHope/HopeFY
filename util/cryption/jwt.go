@@ -2,9 +2,11 @@ package cryption
 
 import (
     "fmt"
-    "github.com/dgrijalva/jwt-go"
-    "github.com/doraHope/HopeFY/settting"
     "time"
+    
+    "github.com/dgrijalva/jwt-go"
+
+    "github.com/doraHope/HopeFY/settting"
 )
 
 var jwtSecret = []byte(settting.AppSetting.JwSecret)

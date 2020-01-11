@@ -1,11 +1,11 @@
 package user
 
 import (
-    "fmt"
+    "github.com/gin-gonic/gin"
+
     "github.com/doraHope/HopeFY/components"
     "github.com/doraHope/HopeFY/enum"
     "github.com/doraHope/HopeFY/settting"
-    "github.com/gin-gonic/gin"
 )
 
 func SayHello(gc *gin.Context) {

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -49,13 +50,17 @@ func NewSessionManager(provideName, cookieName, domain string, maxLifeTime int64
 	if !ok {
 		return nil, fmt.Errorf("session: unknown provide %q ", provideName)
 	}
-	return &Manager{
+	manager := &Manager{
 		cookieName:  cookieName,
 		domain:      domain,
 		provider:    provide,
 		maxLifeTime: maxLifeTime,
 		maxSessionNumber: maxSessionNumber,
-	}, nil
+	}
+	time.AfterFunc(time.Duration(maxLifeTime), func() {
+		manager.GC()
+	})
+	return manager, nil
 }
 
 //注册 由实现Provider接口的结构体调用
