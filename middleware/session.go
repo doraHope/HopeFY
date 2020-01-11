@@ -1,10 +1,11 @@
-package session
+package middleware
 
 import (
     "encoding/json"
     "fmt"
     "github.com/doraHope/HopeFY/util/common"
-    "log"
+	"github.com/doraHope/HopeFY/util/session"
+	"log"
 	"sync"
 	"time"
 
@@ -75,7 +76,7 @@ func (st *SessionStore) SessionID() string {
 	return st.sid
 }
 
-func (rp *RedisProvider) SessionInit(sid string) (Session, error) {
+func (rp *RedisProvider) SessionInit(sid string) (session.Session, error) {
 	rp.lock.Lock()
 	defer rp.lock.Unlock()
 	v := make(map[interface{}]interface{}, 0)
@@ -89,7 +90,7 @@ func (rp *RedisProvider) SessionInit(sid string) (Session, error) {
 	return session, nil
 }
 
-func (rp *RedisProvider) parseSessionStore(sid string) (Session, error) {
+func (rp *RedisProvider) parseSessionStore(sid string) (session.Session, error) {
     st := &SessionStore{}
     var err error
     var element string
@@ -103,7 +104,7 @@ func (rp *RedisProvider) parseSessionStore(sid string) (Session, error) {
     return nil, fmt.Errorf("[session] 解析失败, %v", err)
 }
 
-func (rp *RedisProvider) SessionRead(sid string) (Session, error) {
+func (rp *RedisProvider) SessionRead(sid string) (session.Session, error) {
 	return rp.parseSessionStore(sid)
 }
 

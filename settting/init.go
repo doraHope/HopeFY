@@ -1,8 +1,12 @@
 package settting
 
 import (
-	"gopkg.in/ini.v1"
+	"github.com/doraHope/HopeFY/util/session"
 	"log"
+
+	"gopkg.in/ini.v1"
+
+	_ "github.com/doraHope/HopeFY/middleware"
 )
 
 type App struct {
@@ -32,10 +36,17 @@ type Database struct {
 	TablePrefix string //表前缀
 }
 
+type SessionManger struct {
+	ServerName string
+	CookieName string
+	MaxLifeTime int64
+}
+
 var AppSetting = &App{}
 var ServiceSetting = &Server{}
 var DBSetting = &Database{}
 var RedisSetting = &Redis{}
+var SessionSetting = &SessionManger{}
 var config *ini.File
 
 func mapTo(section string, v interface{}) {
@@ -55,4 +66,15 @@ func Setup() {
 	mapTo("database", DBSetting)
 	mapTo("server", ServiceSetting)
 	mapTo("redis", RedisSetting)
+	mapTo("session", SessionSetting)
+}
+
+
+func RegisterAppMiddleware() {
+	manager, err := session.NewSessionManager(SessionSetting.ServerName, SessionSetting.CookieName, SessionSetting.MaxLifeTime)
+	if err != nil {
+		//todo log
+		log.Fatal(err)
+	}
+	session.Register(SessionSetting.ServerName, manager)
 }
