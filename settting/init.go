@@ -2,7 +2,7 @@ package settting
 
 import (
 	"fmt"
-	"github.com/doraHope/HopeFY/middleware"
+	ms "github.com/doraHope/HopeFY/middleware/session"
 	"github.com/doraHope/HopeFY/util/session"
 	"log"
 
@@ -75,7 +75,7 @@ func init() {
 func RegisterAppMiddleware() {
 	var err error
 	//注册会话Handler
-	rp, err := middleware.Setup(RedisSetting.Host, RedisSetting.Password, RedisSetting.DB)
+	rp, err := ms.RegisterSessionProvider(RedisSetting.Host, RedisSetting.Password, RedisSetting.DB)
 	if err != nil {
 		//todo log
 		log.Fatal("[middleware] 注册失败, %v\n", err)

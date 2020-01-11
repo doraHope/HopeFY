@@ -1,4 +1,4 @@
-package middleware
+package session
 
 import (
 	"encoding/json"
@@ -26,7 +26,7 @@ type SessionStore struct {
 
 var redisProvider *RedisProvider
 
-func Setup(host, password string, db int) (*RedisProvider, error) {
+func RegisterSessionProvider(host, password string, db int) (*RedisProvider, error) {
 	stN := make(map[string]int64, 64)
 	redisProvider = &RedisProvider{
 		Client: redis.NewClient(&redis.Options{
