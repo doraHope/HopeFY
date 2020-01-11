@@ -38,8 +38,8 @@ type Manager struct {
 	lock             sync.Mutex //互斥锁
 	provider         Provider   //存储session方式
 	maxLifeTime      int64      //有效期
-	sessionNumber    int      //当前管理的会话数量
-	maxSessionNumber int      //最大会话数量
+	sessionNumber    int        //当前管理的会话数量
+	maxSessionNumber int        //最大会话数量
 }
 
 var provides = make(map[string]Provider) //并发web服务?
@@ -51,10 +51,10 @@ func NewSessionManager(provideName, cookieName, domain string, maxLifeTime int64
 		return nil, fmt.Errorf("session: unknown provide %q ", provideName)
 	}
 	manager := &Manager{
-		cookieName:  cookieName,
-		domain:      domain,
-		provider:    provide,
-		maxLifeTime: maxLifeTime,
+		cookieName:       cookieName,
+		domain:           domain,
+		provider:         provide,
+		maxLifeTime:      maxLifeTime,
 		maxSessionNumber: maxSessionNumber,
 	}
 	time.AfterFunc(time.Duration(maxLifeTime), func() {
@@ -130,7 +130,7 @@ func (manager *Manager) SessionStart(gc *gin.Context) (Session, error) {
 	cookie, err := gc.Cookie(manager.cookieName)
 	if err != nil || cookie == "" {
 		err = err
-		session, sid, err := manager. setSession()
+		session, sid, err := manager.setSession()
 		if err != nil {
 			return nil, fmt.Errorf("[manager] 设置会话标识失败")
 		}

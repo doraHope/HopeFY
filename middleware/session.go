@@ -1,26 +1,26 @@
 package middleware
 
 import (
-    "encoding/json"
-    "fmt"
-    "github.com/doraHope/HopeFY/util/common"
+	"encoding/json"
+	"fmt"
+	"github.com/doraHope/HopeFY/util/common"
 	"github.com/doraHope/HopeFY/util/session"
 	"sync"
 	"time"
 
-    "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 )
 
 type RedisProvider struct {
-	Client  *redis.Client
-	lock    sync.Mutex
-    stNumber map[string]int64
+	Client   *redis.Client
+	lock     sync.Mutex
+	stNumber map[string]int64
 }
 
 //session实现
 type SessionStore struct {
-	Sid              string                         `json:"sid"`              //会话id
-	LastAccessedTime time.Time                      `json:"lastAccessedTime"` //最后访问时间
+	Sid              string                 `json:"sid"`              //会话id
+	LastAccessedTime time.Time              `json:"lastAccessedTime"` //最后访问时间
 	Data             map[string]interface{} `json:"data, omitempty"`  //session 里面存储的值
 }
 
@@ -45,12 +45,11 @@ func Setup(host, password string, db int) (*RedisProvider, error) {
 	return redisProvider, nil
 }
 
-func NewRedisProvider() () {
+func NewRedisProvider() {
 
 }
 
 func init() {
-
 
 }
 
@@ -59,9 +58,9 @@ func NewSessionStore(sid string, lastACT time.Time, data map[string]interface{})
 		data = make(map[string]interface{}, 8)
 	}
 	return &SessionStore{
-		Sid: sid,
+		Sid:              sid,
 		LastAccessedTime: lastACT,
-		Data: data,
+		Data:             data,
 	}
 }
 
@@ -104,9 +103,9 @@ func (rp *RedisProvider) SessionInit(sid string) (session.Session, error) {
 	v := make(map[string]interface{}, 0)
 	timestamp := time.Now()
 	st := &SessionStore{
-	    Sid: sid,
-	    LastAccessedTime: timestamp,
-	    Data: v,
+		Sid:              sid,
+		LastAccessedTime: timestamp,
+		Data:             v,
 	}
 	rp.stNumber[sid] = timestamp.Unix()
 	err := rp.SessionUpdate(st)
@@ -114,16 +113,16 @@ func (rp *RedisProvider) SessionInit(sid string) (session.Session, error) {
 }
 
 func (rp *RedisProvider) parseSessionStore(sid string) (*SessionStore, error) {
-    st := &SessionStore{}
-    var err error
-    var element string
-    if element, err = rp.Client.Get(sid).Result(); err != nil {
+	st := &SessionStore{}
+	var err error
+	var element string
+	if element, err = rp.Client.Get(sid).Result(); err != nil {
 		if err == redis.Nil {
 			return nil, nil
 		} else {
 			return nil, err
 		}
-    }
+	}
 	err = json.Unmarshal([]byte(element), st)
 	if err != nil {
 		return nil, fmt.Errorf("[session] 解析失败, %v", err)
@@ -144,42 +143,42 @@ func (rp *RedisProvider) SessionRead(sid string) (session.Session, error) {
 }
 
 func (rp *RedisProvider) SessionDestroy(sid string) error {
-    _, err := rp.Client.Del(sid).Result()
-    return err
+	_, err := rp.Client.Del(sid).Result()
+	return err
 }
 
 func (rp *RedisProvider) SessionGC(maxLifeTime int64) int {
 	rp.lock.Lock()
 	defer rp.lock.Unlock()
 	//对话会话进行排序
-    result := common.SortMapSI64(rp.stNumber)
-    //遍历排序后的结果, 并清除对应的会话
-    lastSession := len(result)
+	result := common.SortMapSI64(rp.stNumber)
+	//遍历排序后的结果, 并清除对应的会话
+	lastSession := len(result)
 	for _, sid := range result {
-	    if _, ok := rp.stNumber[sid]; ok {
-            session, err := rp.parseSessionStore(sid)
-            if err != nil {
-                //todo log
-                continue
-            }
-            //经过排序清楚过期会话
-            if session.LastAccessedTime.Unix() < time.Now().Unix() {
+		if _, ok := rp.stNumber[sid]; ok {
+			session, err := rp.parseSessionStore(sid)
+			if err != nil {
+				//todo log
+				continue
+			}
+			//经过排序清楚过期会话
+			if session.LastAccessedTime.Unix() < time.Now().Unix() {
 				session.Delete(sid)
 				lastSession--
-            } else {
-                break;
-            }
-        }
-    }
+			} else {
+				break
+			}
+		}
+	}
 	return lastSession
 }
 func (rp *RedisProvider) SessionUpdate(session *SessionStore) error {
 	session.LastAccessedTime = time.Now()
-    jsonSt, err := json.Marshal(session)
-    if err != nil {
-        return fmt.Errorf("[session] SessionStore转换为json失败, %v", err)
-    }
-    _, err = rp.Client.Set(session.Sid, string(jsonSt), 2 * time.Hour).Result();
+	jsonSt, err := json.Marshal(session)
+	if err != nil {
+		return fmt.Errorf("[session] SessionStore转换为json失败, %v", err)
+	}
+	_, err = rp.Client.Set(session.Sid, string(jsonSt), 2*time.Hour).Result()
 	if err != nil {
 		return fmt.Errorf("[session] SessionStore缓存到redis失败, %v", err)
 	}

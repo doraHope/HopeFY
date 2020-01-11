@@ -11,13 +11,13 @@ func InitRouter() *gin.Engine {
 	apiUser := router.Group("/user")
 	{
 		apiUser.GET("/:id?action=login", user.SayHello)
-        apiUser.GET("", func(c *gin.Context) {
-            c.JSON(http.StatusOK, gin.H{
-                "code": 0,
-                "msg":  "success",
-                "data": nil,
-            })
-        })
+		apiUser.GET("", func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"code": 0,
+				"msg":  "success",
+				"data": nil,
+			})
+		})
 	}
 	return router
 }

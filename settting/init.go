@@ -14,15 +14,15 @@ type App struct {
 }
 
 type Server struct {
-	Host string	//web服务域名
+	Host string //web服务域名
 	Ip   string //web服务主机名
 	Port string //web服务端口号
 }
 
 type Redis struct {
-	Host		string
-	Password 	string
-	DB			int
+	Host     string
+	Password string
+	DB       int
 }
 
 type Database struct {
@@ -37,9 +37,9 @@ type Database struct {
 }
 
 type SessionManger struct {
-	ServerName string
-	CookieName string
-	MaxLifeTime int64
+	ServerName       string
+	CookieName       string
+	MaxLifeTime      int64
 	MaxSessionNumber int64
 }
 
@@ -72,7 +72,6 @@ func init() {
 	mapTo("session", SessionSetting)
 }
 
-
 func RegisterAppMiddleware() {
 	var err error
 	//注册会话Handler
@@ -84,7 +83,7 @@ func RegisterAppMiddleware() {
 	session.Register(SessionSetting.ServerName, rp)
 	//创建会话Manager
 	fmt.Printf("setting-session:`%v`\n", SessionSetting)
-	SManager, err = session.NewSessionManager(SessionSetting.ServerName, SessionSetting.CookieName, ServiceSetting.Host,  SessionSetting.MaxLifeTime, int(SessionSetting.MaxSessionNumber))
+	SManager, err = session.NewSessionManager(SessionSetting.ServerName, SessionSetting.CookieName, ServiceSetting.Host, SessionSetting.MaxLifeTime, int(SessionSetting.MaxSessionNumber))
 	if err != nil {
 		//todo log
 		log.Fatal(err)

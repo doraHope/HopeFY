@@ -1,6 +1,5 @@
 package enum
 
-
 var errMsg = map[int]string{
 	SUCCESS:        "成功",
 	INVALID_PARAMS: "参数错误",
@@ -8,9 +7,8 @@ var errMsg = map[int]string{
 }
 
 func ErrMsg(code int) string {
-    if msg, ok := errMsg[code]; ok {
-        return msg
-    }
-    return errMsg[SERVICE_ERROR]
+	if msg, ok := errMsg[code]; ok {
+		return msg
+	}
+	return errMsg[SERVICE_ERROR]
 }
-
