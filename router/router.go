@@ -10,7 +10,7 @@ func InitRouter() *gin.Engine {
 	router := gin.New()
 	apiUser := router.Group("/user")
 	{
-		apiUser.GET("/:id?action=login", user.Action)
+		apiUser.GET("/:id?action=login", user.SayHello)
         apiUser.GET("", func(c *gin.Context) {
             c.JSON(http.StatusOK, gin.H{
                 "code": 0,

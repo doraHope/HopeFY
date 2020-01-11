@@ -1,12 +1,12 @@
 package settting
 
 import (
+	"fmt"
+	"github.com/doraHope/HopeFY/middleware"
 	"github.com/doraHope/HopeFY/util/session"
 	"log"
 
 	"gopkg.in/ini.v1"
-
-	_ "github.com/doraHope/HopeFY/middleware"
 )
 
 type App struct {
@@ -40,6 +40,7 @@ type SessionManger struct {
 	ServerName string
 	CookieName string
 	MaxLifeTime int64
+	MaxSessionNumber int64
 }
 
 var AppSetting = &App{}
@@ -49,6 +50,8 @@ var RedisSetting = &Redis{}
 var SessionSetting = &SessionManger{}
 var config *ini.File
 
+var SManager *session.Manager
+
 func mapTo(section string, v interface{}) {
 	err := config.Section(section).MapTo(v)
 	if err != nil {
@@ -56,9 +59,9 @@ func mapTo(section string, v interface{}) {
 	}
 }
 
-func Setup() {
+func init() {
 	var err error
-	config, err = ini.Load("../config/app.ini")
+	config, err = ini.Load("D:/go/stayWithYou/HopeFY/config/app.ini")
 	if err != nil {
 		log.Fatal("Fail to parse 'config/app.ini': %v", err)
 	}
@@ -71,10 +74,19 @@ func Setup() {
 
 
 func RegisterAppMiddleware() {
-	manager, err := session.NewSessionManager(SessionSetting.ServerName, SessionSetting.CookieName, SessionSetting.MaxLifeTime)
+	var err error
+	//注册会话Handler
+	rp, err := middleware.Setup(RedisSetting.Host, RedisSetting.Password, RedisSetting.DB)
+	if err != nil {
+		//todo log
+		log.Fatal("[middleware] 注册失败, %v\n", err)
+	}
+	session.Register(SessionSetting.ServerName, rp)
+	//创建会话Manager
+	fmt.Printf("setting-session:`%v`\n", SessionSetting)
+	SManager, err = session.NewSessionManager(SessionSetting.ServerName, SessionSetting.CookieName, ServiceSetting.Host,  SessionSetting.MaxLifeTime, int(SessionSetting.MaxSessionNumber))
 	if err != nil {
 		//todo log
 		log.Fatal(err)
 	}
-	session.Register(SessionSetting.ServerName, manager)
 }
