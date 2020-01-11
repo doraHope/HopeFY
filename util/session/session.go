@@ -138,7 +138,7 @@ func (manager *Manager) SessionStart(gc *gin.Context) (Session, error) {
 		manager.sessionNumber++
 		if manager.sessionNumber >= manager.maxSessionNumber {
 			go func() {
-				manager.GC()
+				manager.sessionNumber = manager.provider.SessionGC(manager.maxLifeTime)
 			}()
 		}
 		gc.SetCookie(manager.cookieName, url.QueryEscape(sid), int(manager.maxLifeTime), "/", manager.domain, false, true)
@@ -158,7 +158,7 @@ func (manager *Manager) SessionStart(gc *gin.Context) (Session, error) {
 		manager.sessionNumber++
 		if manager.sessionNumber >= manager.maxSessionNumber {
 			go func() {
-				manager.GC()
+				manager.sessionNumber = manager.provider.SessionGC(manager.maxLifeTime)
 			}()
 		}
 		gc.SetCookie(manager.cookieName, url.QueryEscape(sid), int(manager.maxLifeTime), "/", manager.domain, false, true)
@@ -186,4 +186,7 @@ func (manager *Manager) GC() {
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 	manager.sessionNumber = manager.provider.SessionGC(manager.maxLifeTime)
+	time.AfterFunc(time.Duration(manager.maxLifeTime), func() {
+		manager.GC()
+	})
 }
