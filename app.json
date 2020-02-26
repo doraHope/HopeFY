@@ -1,0 +1,36 @@
+{
+  "mysql": {
+    "host": "localhost",
+    "port": "3306",
+    "user": "root",
+    "password": "chuyinwl01",
+    "name": "go",
+    "opt": "charset=utf8mb4",
+    "max_open": 100,
+    "max_idle": 50
+  },
+  "session": {
+    "prefix": "swy",
+    "expired": 120,
+    "maxOpenSession": 12000
+  },
+  "redis": {
+    "host": "localhost",
+    "port": "6379"
+  },
+  "logger": {
+    "rotation_time": "7200",
+    "rotation_cnt": 24,
+    "stand_level": "info",
+    "files": [
+      {
+        "file_name_format": "app_info.log.%Y%m%d%H",
+        "levels": ["debug", "info"]
+      },
+      {
+        "file_name_format": "app_info.warn.log.%Y%m%d%H",
+        "levels": ["warn", "error", "fatal", "panic"]
+      }
+    ]
+  }
+}
