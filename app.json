@@ -3,7 +3,7 @@
     "host": "localhost",
     "port": "3306",
     "user": "root",
-    "password": "chuyinwl01",
+    "password": "******",
     "name": "go",
     "opt": "charset=utf8mb4",
     "max_open": 100,
