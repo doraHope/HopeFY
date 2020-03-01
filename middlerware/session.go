@@ -16,13 +16,14 @@ const (
 )
 
 func init() {
+	mc := config.AppConfig.Session
 	mg = Manager{
 		sm:             make(map[string]int, 32),
-		sl:             make([]SessionStore, 0, 32),
+		sl:             make([]*SessionStore, 0, 32),
 		lock:           sync.RWMutex{},
-		prefix:         config.AppConfig.Session.Prefix,
-		expired:        config.AppConfig.Session.Expired,
-		maxOpenSession: config.AppConfig.Session.MaxOpenSession,
+		prefix:         mc.Prefix,
+		expired:        mc.Expired,
+		maxOpenSession: mc.MaxOpenSession,
 	}
 	Cont.Register("session", &mg)
 	go func() {
@@ -85,7 +86,7 @@ type SessionStore struct {
 
 type Manager struct {
 	sm             map[string]int //索引表
-	sl             []SessionStore //数组结构
+	sl             []*SessionStore //数组结构
 	lock           sync.RWMutex   //互斥锁
 	prefix         string         //前缀
 	expired        int            //有效时间, 单位m
@@ -191,7 +192,7 @@ func (s *SessionStore) update() {
 			//todo log
 		}
 		s.lastUpAt = time.Now()
-		s.expireAt = time.Now().Add(time.Duration(mg.expired) * time.Minute)
+		s.expireAt = s.lastUpAt.Add(time.Duration(mg.expired) * time.Minute)
 	}
 }
 
@@ -324,7 +325,7 @@ func (m *Manager) getSS(sid string) (*SessionStore, bool) {
 	m.lock.RLock()
 	if i, ok := m.sm[sid]; ok {
 		m.lock.RUnlock()
-		return &m.sl[i], true
+		return m.sl[i], true
 	} else {
 		m.lock.RUnlock()
 		//尝试从缓存中间件中读取
@@ -335,15 +336,16 @@ func (m *Manager) getSS(sid string) (*SessionStore, bool) {
 				m.lock.Lock()
 				defer m.lock.Unlock()
 
-				m.sl = append(m.sl, SessionStore{
+				t := time.Now()
+				m.sl = append(m.sl, &SessionStore{
 					id:       sid,
 					data:     sc,
-					expireAt: time.Now().Add(time.Duration(m.expired) * time.Minute),
-					lastUpAt: time.Now(),
+					lastUpAt: t,
+					expireAt: t.Add(time.Duration(m.expired) * time.Minute),
 				})
 				m.sm[sid] = m.openSession
 				m.openSession++
-				return &m.sl[m.sm[sid]], false
+				return m.sl[m.sm[sid]], false
 			} else {
 				//todo log
 			}
@@ -356,13 +358,15 @@ func (m *Manager) getSS(sid string) (*SessionStore, bool) {
 func (m *Manager) setSS(sid string) *SessionStore {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m.sl = append(m.sl, SessionStore{
+
+	t := time.Now()
+	m.sl = append(m.sl, &SessionStore{
 		id:       sid,
 		data:     make(map[string]interface{}, 8),
-		expireAt: time.Now().Add(time.Duration(m.expired) * time.Minute),
-		lastUpAt: time.Now(),
+		lastUpAt: t,
+		expireAt: t.Add(time.Duration(m.expired) * time.Minute),
 	})
 	m.sm[sid] = m.openSession
 	m.openSession++
-	return &m.sl[m.sm[sid]]
+	return m.sl[m.sm[sid]]
 }
